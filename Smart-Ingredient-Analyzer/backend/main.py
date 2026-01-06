@@ -34,10 +34,8 @@ origins = [
 ]
 
 if settings.NODE_ENV == "production":
-    origins.extend([
-        "https://smart-ingredient-analyzer.vercel.app",
-        "https://ai-ingredient-analyzer.vercel.app",
-    ])
+    # Allow all origins in production (Vercel domain will vary)
+    origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,

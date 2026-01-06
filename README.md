@@ -124,6 +124,20 @@ Open browser to `http://localhost:5173`
 
 ---
 
+## 🚀 Deployment
+
+Want to deploy this live? It's super easy!
+
+**Quick Deploy (5 minutes):**
+- Backend: Deploy to [Render](https://render.com) (Free)
+- Frontend: Deploy to [Vercel](https://vercel.com) (Free)
+
+📖 See [README_DEPLOY.md](Smart-Ingredient-Analyzer/README_DEPLOY.md) for step-by-step instructions.
+
+All configuration files are ready - just connect your GitHub and click deploy!
+
+---
+
 ## Project Structure
 
 ```
