@@ -24,7 +24,7 @@ npm install
 
 The Groq API key is already configured in `backend/.env`:
 ```
-GROQ_API_KEY=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
+GROQ_API_KEY=Enter_your_api_key
 GROQ_MODEL=llama-3.3-70b-versatile
 NODE_ENV=development
 PORT=5001
