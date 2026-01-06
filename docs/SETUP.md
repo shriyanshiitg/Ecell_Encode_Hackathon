@@ -52,35 +52,6 @@ Navigate to: **http://localhost:5173**
 
 ---
 
-## Troubleshooting
-
-### Port 5001 Already in Use
-```bash
-# Kill process on port 5001
-lsof -ti:5001 | xargs kill -9
-
-# Then restart backend
-uvicorn main:app --reload --port 5001
-```
-
-### Backend Won't Start
-- Check if Python is installed: `python3 --version`
-- Verify you're in correct directory: `pwd`
-- Check `.env` file exists in `backend/`
-- Install dependencies: `pip install -r requirements.txt`
-
-### Frontend Won't Start
-- Make sure backend is running first
-- Clear node_modules: `rm -rf node_modules && npm install`
-- Try different port: Update `vite.config.js`
-
-### Features Not Loading
-- Hard refresh browser: `Cmd+Shift+R` (Mac) or `Ctrl+Shift+F5` (Windows)
-- Clear browser cache
-- Check browser console for errors (F12)
-
----
-
 ## Testing the App
 
 ### 1. Basic Chat
