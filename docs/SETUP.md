@@ -1,9 +1,10 @@
-# 🚀 Setup Instructions
+# Setup Instructions
 
 ## Quick Setup (5 Minutes)
 
 ### 1. Prerequisites
-- Node.js 18+ installed
+- Python 3.9+ installed
+- Node.js 18+ installed (for frontend)
 - Text editor
 - Terminal access
 
@@ -11,8 +12,8 @@
 
 ```bash
 # Backend
-cd Smart-Ingredient-Analyzer/back-end
-npm install
+cd Smart-Ingredient-Analyzer/backend
+pip install -r requirements.txt
 
 # Frontend
 cd ../front-end
@@ -21,7 +22,7 @@ npm install
 
 ### 3. Configure API Key
 
-The Groq API key is already configured in `back-end/.env`:
+The Groq API key is already configured in `backend/.env`:
 ```
 GROQ_API_KEY=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
 GROQ_MODEL=llama-3.3-70b-versatile
@@ -33,10 +34,11 @@ PORT=5001
 
 **Terminal 1 - Backend:**
 ```bash
-cd Smart-Ingredient-Analyzer/back-end
-npm start
+cd Smart-Ingredient-Analyzer/backend
+uvicorn main:app --reload --port 5001
+# Or use: ./start.sh
 ```
-Wait for: `🚀 Smart Food Analyzer API running on port 5001`
+Wait for: `INFO:     Uvicorn running on http://0.0.0.0:5001`
 
 **Terminal 2 - Frontend:**
 ```bash
@@ -58,13 +60,14 @@ Navigate to: **http://localhost:5173**
 lsof -ti:5001 | xargs kill -9
 
 # Then restart backend
-npm start
+uvicorn main:app --reload --port 5001
 ```
 
 ### Backend Won't Start
-- Check if Node.js is installed: `node --version`
+- Check if Python is installed: `python3 --version`
 - Verify you're in correct directory: `pwd`
-- Check `.env` file exists in `back-end/`
+- Check `.env` file exists in `backend/`
+- Install dependencies: `pip install -r requirements.txt`
 
 ### Frontend Won't Start
 - Make sure backend is running first
@@ -109,4 +112,4 @@ npm start
 
 ## Ready for Demo!
 
-All features working? → See [HACKATHON_GUIDE.md](../HACKATHON_GUIDE.md) for demo script
+All features working? You're ready to go!

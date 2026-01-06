@@ -234,15 +234,16 @@ const ConversationalResult = ({ analysis, onReset, apiUrl, userContext }) => {
                     </h3>
                     <div className="space-y-2">
                       {msg.aiQuestions.map((question, i) => (
-                        <div key={i} className="bg-white rounded-lg p-3 border border-purple-200">
-                          <p className="text-sm text-gray-800">{question}</p>
-                          <button
-                            onClick={() => handleQuickQuestion(question)}
-                            className="text-xs text-purple-600 hover:text-purple-800 font-medium mt-1"
-                          >
+                        <button
+                          key={i}
+                          onClick={() => handleQuickQuestion(question)}
+                          className="w-full bg-white hover:bg-purple-50 rounded-lg p-3 border border-purple-200 text-left transition-colors"
+                        >
+                          <p className="text-sm text-gray-900">{question}</p>
+                          <span className="text-xs text-purple-600 font-medium mt-1 inline-block">
                             → Answer this
-                          </button>
-                        </div>
+                          </span>
+                        </button>
                       ))}
                     </div>
                     <p className="text-xs text-gray-600 mt-2 italic">

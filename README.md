@@ -52,7 +52,7 @@ Users maintain full control over their data with a one-click memory clear featur
 
 ### Architecture
 **Frontend**: React (Vite), Tailwind CSS
-**Backend**: Express.js, Node.js
+**Backend**: Python (FastAPI)
 **AI Model**: Llama 3.3 70B via Groq API
 **OCR**: Tesseract.js for image text extraction
 **Storage**: Browser localStorage (no backend database)
@@ -78,19 +78,20 @@ POST /api/compare        - Compare two products
 ## Setup Instructions
 
 ### Prerequisites
-- Node.js 18+
+- Python 3.9+
+- Node.js 18+ (for frontend only)
 - Groq API key (free tier: https://console.groq.com/)
 
 ### Installation
 
 1. **Install backend dependencies**
 ```bash
-cd Smart-Ingredient-Analyzer/back-end
-npm install
+cd Smart-Ingredient-Analyzer/backend
+pip install -r requirements.txt
 ```
 
 2. **Configure environment**
-Create or verify `.env` file in `back-end/`:
+The `.env` file is already configured in `backend/`:
 ```
 GROQ_API_KEY=your_api_key_here
 GROQ_MODEL=llama-3.3-70b-versatile
@@ -108,8 +109,9 @@ npm install
 
 **Terminal 1 - Backend:**
 ```bash
-cd back-end
-npm start
+cd backend
+uvicorn main:app --reload --port 5001
+# Or use: ./start.sh
 ```
 
 **Terminal 2 - Frontend:**
@@ -126,13 +128,19 @@ Open browser to `http://localhost:5173`
 
 ```
 Smart-Ingredient-Analyzer/
-├── back-end/
+├── backend/                     # Python FastAPI backend
+│   ├── main.py                  # FastAPI application
 │   ├── services/
-│   │   ├── groqService.js        # AI analysis logic
-│   │   └── contextService.js     # Context learning
-│   ├── server.js                 # Express API
-│   ├── optimized-ocr.js          # Image processing
-│   └── .env                      # Configuration
+│   │   ├── groq_service.py      # AI analysis logic
+│   │   └── context_service.py   # Context learning
+│   ├── utils/
+│   │   ├── cache.py             # Caching utilities
+│   │   ├── validators.py        # Request validation
+│   │   └── helpers.py           # Helper functions
+│   ├── config/
+│   │   └── settings.py          # Configuration
+│   ├── requirements.txt         # Python dependencies
+│   └── .env                     # Environment variables
 │
 ├── front-end/
 │   └── src/
