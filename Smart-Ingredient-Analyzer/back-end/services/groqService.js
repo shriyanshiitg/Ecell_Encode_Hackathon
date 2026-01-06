@@ -21,8 +21,10 @@ CORE PRINCIPLES:
 1. Be conversational and intent-first - infer what matters to the user
 2. Explain WHY things matter, not just WHAT they are
 3. Express uncertainty honestly when evidence is mixed
-4. Focus on trade-offs (taste vs health, natural vs processed)
+4. Focus on trade-offs (taste vs health, natural vs processed, cost vs quality)
 5. Reduce cognitive load - make decisions easier, not harder
+6. Be proactive - anticipate questions and offer relevant insights
+7. Act like a copilot - suggest next steps and alternatives
 
 ${contextPart}
 
@@ -37,7 +39,8 @@ You must return a JSON object with this structure:
       "insight": "Brief conversational insight",
       "explanation": "Why this matters to the user",
       "uncertaintyLevel": "low|medium|high",
-      "reasoning": "The logic behind this conclusion"
+      "reasoning": "The logic behind this conclusion",
+      "tradeoff": "Explain the trade-off: what benefit exists vs what cost/risk (e.g., 'Preserves freshness for months but may cause digestive discomfort in sensitive individuals')"
     }
   ],
   "ingredients": [
@@ -45,16 +48,38 @@ You must return a JSON object with this structure:
       "name": "ingredient name",
       "category": "Good|Neutral|Concerning|Unknown",
       "explanation": "Human-friendly explanation of what this is and why it matters",
-      "tradeoffs": "Any relevant trade-offs (e.g., 'provides preservation but may affect digestion')",
+      "tradeoffs": "Detailed trade-off analysis: benefit vs drawback (e.g., 'Taste: excellent sweetness | Health: rapid blood sugar spike | Cost: cheaper than alternatives')",
       "uncertainty": "Any uncertainty or conflicting evidence",
-      "relevantTo": ["allergy", "diabetes", "heart-health", etc]
+      "relevantTo": ["allergy", "diabetes", "heart-health", etc],
+      "alternatives": "Better alternatives if this is concerning (e.g., 'Look for honey or cane sugar instead')"
     }
   ],
   "inferredConcerns": ["health concerns we think matter based on ingredients"],
-  "recommendedQuestions": ["questions the user might want to ask"]
+  "recommendedQuestions": ["questions the user might want to ask"],
+  "proactiveSuggestions": [
+    {
+      "suggestion": "Proactive insight or recommendation based on analysis",
+      "reasoning": "Why this suggestion matters",
+      "priority": "high|medium|low"
+    }
+  ],
+  "aiQuestions": [
+    "Questions the AI wants to ask the user to better understand their needs (e.g., 'Do you usually consume this in the morning or evening?', 'Are you sensitive to caffeine?')"
+  ],
+  "overallAssessment": {
+    "verdict": "One clear sentence: Should they buy this? (e.g., 'Good choice for quick energy, but watch portion size if managing blood sugar')",
+    "bestFor": "Who is this product ideal for? (e.g., 'Active individuals needing quick carbs')",
+    "notIdealFor": "Who should avoid or be cautious? (e.g., 'People with diabetes or blood sugar concerns')",
+    "betterAlternative": "Suggest a better option if concerns exist (e.g., 'Try steel-cut oats with fresh fruit for sustained energy')"
+  }
 }
 
-IMPORTANT JSON RULES:
+CRITICAL REQUIREMENTS:
+- Every keyInsight MUST have a "tradeoff" field explaining benefit vs cost
+- Every concerning ingredient MUST suggest alternatives
+- Include 1-3 proactiveSuggestions based on what you notice
+- Ask 1-2 aiQuestions to better understand user context
+- Give clear verdict in overallAssessment - help them decide!
 - Return ONLY valid JSON, no markdown, no code fences
 - Use single quotes inside strings if needed
 - Be conversational but keep explanations concise (1-2 sentences)
@@ -158,6 +183,16 @@ IMPORTANT JSON RULES:
         err.code = "GROQ_INVALID_STRUCTURE";
         throw err;
       }
+
+      // Set defaults for new fields if missing
+      analysis.proactiveSuggestions = analysis.proactiveSuggestions || [];
+      analysis.aiQuestions = analysis.aiQuestions || [];
+      analysis.overallAssessment = analysis.overallAssessment || {
+        verdict: "Analysis complete",
+        bestFor: "General use",
+        notIdealFor: "None identified",
+        betterAlternative: null
+      };
 
       return {
         analysis,

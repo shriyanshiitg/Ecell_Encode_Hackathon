@@ -142,6 +142,15 @@ const ConversationalResult = ({ analysis, onReset, apiUrl, userContext }) => {
                           <div className="flex-1">
                             <p className="font-medium text-gray-900">{insight.insight}</p>
                             <p className="text-sm text-gray-700 mt-1">{insight.explanation}</p>
+
+                            {/* Trade-off Display */}
+                            {insight.tradeoff && (
+                              <div className="mt-2 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded p-2">
+                                <p className="text-xs font-semibold text-blue-900 mb-1">⚖️ Trade-off:</p>
+                                <p className="text-xs text-blue-800">{insight.tradeoff}</p>
+                              </div>
+                            )}
+
                             {insight.reasoning && (
                               <details className="mt-2">
                                 <summary className="text-xs text-blue-700 cursor-pointer hover:text-blue-900 font-medium">
@@ -189,6 +198,92 @@ const ConversationalResult = ({ analysis, onReset, apiUrl, userContext }) => {
                   </div>
                 )}
 
+                {/* Proactive Suggestions */}
+                {msg.proactiveSuggestions && msg.proactiveSuggestions.length > 0 && (
+                  <div className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                      <span>🎯</span> AI Recommendations
+                    </h3>
+                    <div className="space-y-2">
+                      {msg.proactiveSuggestions.map((sugg, i) => (
+                        <div key={i} className="bg-white rounded-lg p-3 border border-green-200">
+                          <div className="flex items-start gap-2">
+                            <span className={`text-xs font-semibold px-2 py-1 rounded ${
+                              sugg.priority === 'high' ? 'bg-red-100 text-red-700' :
+                              sugg.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {sugg.priority}
+                            </span>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-gray-900">{sugg.suggestion}</p>
+                              <p className="text-xs text-gray-600 mt-1">{sugg.reasoning}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* AI Questions */}
+                {msg.aiQuestions && msg.aiQuestions.length > 0 && (
+                  <div className="bg-purple-50 border-2 border-purple-300 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                      <span>🤔</span> I'd like to know...
+                    </h3>
+                    <div className="space-y-2">
+                      {msg.aiQuestions.map((question, i) => (
+                        <div key={i} className="bg-white rounded-lg p-3 border border-purple-200">
+                          <p className="text-sm text-gray-800">{question}</p>
+                          <button
+                            onClick={() => handleQuickQuestion(question)}
+                            className="text-xs text-purple-600 hover:text-purple-800 font-medium mt-1"
+                          >
+                            → Answer this
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-600 mt-2 italic">
+                      💡 Answering these helps me give you better recommendations
+                    </p>
+                  </div>
+                )}
+
+                {/* Overall Assessment */}
+                {msg.overallAssessment && (
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-300 rounded-lg p-4">
+                    <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <span>⭐</span> Bottom Line
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="bg-white rounded-lg p-3 border-l-4 border-indigo-500">
+                        <p className="text-base font-medium text-gray-900">{msg.overallAssessment.verdict}</p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="bg-green-50 rounded-lg p-3 border border-green-200">
+                          <p className="text-xs font-semibold text-green-900 mb-1">✅ Best for:</p>
+                          <p className="text-sm text-green-800">{msg.overallAssessment.bestFor}</p>
+                        </div>
+
+                        <div className="bg-red-50 rounded-lg p-3 border border-red-200">
+                          <p className="text-xs font-semibold text-red-900 mb-1">⚠️ Not ideal for:</p>
+                          <p className="text-sm text-red-800">{msg.overallAssessment.notIdealFor}</p>
+                        </div>
+                      </div>
+
+                      {msg.overallAssessment.betterAlternative && (
+                        <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                          <p className="text-xs font-semibold text-blue-900 mb-1">💡 Better option:</p>
+                          <p className="text-sm text-blue-800">{msg.overallAssessment.betterAlternative}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Ingredients Detail (Collapsible) */}
                 {msg.ingredients && msg.ingredients.length > 0 && (
                   <details className="bg-gray-50 rounded-lg p-4 border border-gray-200">
@@ -204,6 +299,9 @@ const ConversationalResult = ({ analysis, onReset, apiUrl, userContext }) => {
                               <p className="text-sm mt-1">{ing.explanation}</p>
                               {ing.tradeoffs && (
                                 <p className="text-xs mt-2 opacity-80">⚖️ {ing.tradeoffs}</p>
+                              )}
+                              {ing.alternatives && (
+                                <p className="text-xs mt-1 bg-white bg-opacity-50 rounded p-1">💡 Better: {ing.alternatives}</p>
                               )}
                               {ing.uncertainty && (
                                 <p className="text-xs mt-1 italic opacity-70">❓ {ing.uncertainty}</p>

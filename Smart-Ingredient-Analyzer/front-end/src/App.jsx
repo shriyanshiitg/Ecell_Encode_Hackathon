@@ -3,6 +3,7 @@ import React, { useRef, useState, useCallback, useEffect } from "react";
 import WebcamCapture from "./components/WebcamCapture";
 import ImageUploader from "./components/ImageUploader";
 import ManualInput from "./components/ManualInput";
+import ComparisonMode from "./components/ComparisonMode";
 import ConversationalResult from "./components/ConversationalResult";
 import ContextDisplay from "./components/ContextDisplay";
 import { compressImage, detectDeviceCapabilities } from "./utils/imageUtils";
@@ -36,7 +37,38 @@ function App() {
   useEffect(() => {
     const capabilities = detectDeviceCapabilities();
     setDeviceCapabilities(capabilities);
+
+    // Load saved user context from localStorage
+    try {
+      const savedContext = localStorage.getItem('userHealthContext');
+      if (savedContext) {
+        const parsed = JSON.parse(savedContext);
+        setUserContext(parsed);
+        console.log('✨ Loaded previous context from localStorage:', parsed);
+
+        // Show welcome back message
+        setMessages(prev => [{
+          role: 'assistant',
+          content: `Welcome back! 👋 I remember you're interested in ${parsed.healthConcerns?.join(', ') || 'health'}. Let's continue from where we left off.`,
+          timestamp: new Date()
+        }]);
+      }
+    } catch (error) {
+      console.error('Failed to load context:', error);
+    }
   }, []);
+
+  // Save context to localStorage whenever it changes
+  useEffect(() => {
+    if (userContext) {
+      try {
+        localStorage.setItem('userHealthContext', JSON.stringify(userContext));
+        console.log('💾 Saved context to localStorage');
+      } catch (error) {
+        console.error('Failed to save context:', error);
+      }
+    }
+  }, [userContext]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -353,6 +385,24 @@ function App() {
     }
   }, [deviceCapabilities, userContext, getApiUrl]);
 
+  const handleCompareProducts = useCallback(async (product1, product2) => {
+    try {
+      const apiUrl = getApiUrl();
+      const response = await axios.post(`${apiUrl}/api/compare`, {
+        product1,
+        product2,
+        userContext
+      }, {
+        timeout: 30000
+      });
+
+      return response.data.comparison;
+    } catch (error) {
+      console.error('Comparison error:', error);
+      throw error;
+    }
+  }, [userContext, getApiUrl]);
+
   const reset = useCallback(() => {
     setImageSrc(null);
     setAnalysis(null);
@@ -366,6 +416,25 @@ function App() {
   const initiateCapture = useCallback((captureMode) => {
     setMode(captureMode);
     setShowChat(false);
+  }, []);
+
+  const handleClearContext = useCallback(() => {
+    if (window.confirm('Are you sure you want to clear all saved preferences? This will delete what the AI has learned about you.')) {
+      // Clear localStorage
+      localStorage.removeItem('userHealthContext');
+
+      // Reset context state
+      setUserContext(null);
+
+      // Add message to chat
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: '🗑️ Memory cleared! I\'ve forgotten everything about your preferences. Feel free to tell me about your health concerns again, and I\'ll learn from scratch.',
+        timestamp: new Date()
+      }]);
+
+      console.log('✅ Context cleared');
+    }
   }, []);
 
   return (
@@ -434,13 +503,13 @@ function App() {
               {/* Context Display */}
               {userContext && (
                 <div className="px-4">
-                  <ContextDisplay userContext={userContext} />
+                  <ContextDisplay userContext={userContext} onClearContext={handleClearContext} />
                 </div>
               )}
 
               {/* Quick Actions */}
               <div className="border-t border-gray-200 p-4 bg-gray-50 space-y-2">
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => initiateCapture('camera')}
                     className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm"
@@ -468,6 +537,15 @@ function App() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Type
+                  </button>
+                  <button
+                    onClick={() => initiateCapture('compare')}
+                    className="bg-gradient-to-r from-orange-600 to-red-600 text-white py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 text-sm"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Compare
                   </button>
                 </div>
               </div>
@@ -515,6 +593,15 @@ function App() {
             <div className="p-6">
               <ManualInput
                 onAnalyze={analyzeManualIngredients}
+                onBack={() => { setMode(null); setShowChat(true); }}
+              />
+            </div>
+          )}
+
+          {mode === 'compare' && (
+            <div className="p-6">
+              <ComparisonMode
+                onCompare={handleCompareProducts}
                 onBack={() => { setMode(null); setShowChat(true); }}
               />
             </div>

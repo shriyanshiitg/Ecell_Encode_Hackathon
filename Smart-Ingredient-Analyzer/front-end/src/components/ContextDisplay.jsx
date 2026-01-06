@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ContextDisplay = ({ userContext }) => {
+const ContextDisplay = ({ userContext, onClearContext }) => {
   if (!userContext || (
     (!userContext.healthConcerns || userContext.healthConcerns.length === 0) &&
     (!userContext.allergens || userContext.allergens.length === 0) &&
@@ -94,9 +94,20 @@ const ContextDisplay = ({ userContext }) => {
         )}
       </div>
 
-      <p className="text-xs text-gray-500 mt-2 italic">
-        💡 I'll use this to personalize my analysis for you
-      </p>
+      <div className="mt-3 pt-3 border-t border-blue-200 flex items-center justify-between">
+        <p className="text-xs text-gray-500 italic">
+          💡 I'll use this to personalize my analysis for you
+        </p>
+        <button
+          onClick={onClearContext}
+          className="text-xs text-red-600 hover:text-red-800 font-medium px-3 py-1 rounded-lg border border-red-300 hover:bg-red-50 transition-colors flex items-center gap-1"
+        >
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Clear Memory
+        </button>
+      </div>
     </div>
   );
 };

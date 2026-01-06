@@ -458,6 +458,95 @@ app.post("/api/analyze-text", async (req, res, next) => {
   }
 });
 
+// Compare two products
+app.post("/api/compare", async (req, res, next) => {
+  try {
+    const { product1, product2, userContext } = req.body;
+
+    if (!product1?.ingredients || !product2?.ingredients) {
+      return res.status(400).json({
+        error: "Both products with ingredients are required",
+        code: "MISSING_PRODUCTS"
+      });
+    }
+
+    console.log(`🔍 Comparing: ${product1.name || 'Product 1'} vs ${product2.name || 'Product 2'}`);
+
+    // Analyze both products
+    const [analysis1, analysis2] = await Promise.all([
+      groqService.analyze(product1.ingredients, { userContext, fastMode: true }),
+      groqService.analyze(product2.ingredients, { userContext, fastMode: true })
+    ]);
+
+    // Generate comparison using AI
+    const comparisonPrompt = `You are comparing two food products for a health-conscious user.
+
+PRODUCT 1 (${product1.name || 'Product A'}):
+Ingredients: ${product1.ingredients}
+
+PRODUCT 2 (${product2.name || 'Product B'}):
+Ingredients: ${product2.ingredients}
+
+${userContext ? `USER CONTEXT: ${JSON.stringify(userContext)}` : ''}
+
+Return a JSON comparison:
+{
+  "winner": "Clear recommendation: which product is better and why (1-2 sentences)",
+  "product1": {
+    "score": 1-10 rating,
+    "pros": ["list of advantages"],
+    "cons": ["list of disadvantages"],
+    "summary": "One sentence summary"
+  },
+  "product2": {
+    "score": 1-10 rating,
+    "pros": ["list of advantages"],
+    "cons": ["list of disadvantages"],
+    "summary": "One sentence summary"
+  },
+  "keyDifferences": ["list of most important differences"]
+}
+
+Be conversational and focus on practical decision-making. Consider trade-offs.`;
+
+    const comparisonResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: env.GROQ_MODEL,
+        temperature: 0.1,
+        max_tokens: 1500,
+        messages: [{ role: "user", content: comparisonPrompt }],
+      }),
+    });
+
+    const comparisonData = await comparisonResponse.json();
+    const comparisonText = comparisonData.choices?.[0]?.message?.content || "";
+
+    // Extract JSON from response
+    const jsonMatch = comparisonText.match(/{[\s\S]*}/);
+    const comparison = jsonMatch ? JSON.parse(jsonMatch[0]) : null;
+
+    if (!comparison) {
+      throw new Error("Failed to generate comparison");
+    }
+
+    res.json({
+      comparison,
+      analysis1: analysis1.analysis,
+      analysis2: analysis2.analysis,
+      success: true
+    });
+
+  } catch (error) {
+    console.error('Comparison error:', error);
+    next(error);
+  }
+});
+
 // 404 handler
 app.all("*", (req, res) => {
   res.status(404).json({ error: "Endpoint not found" });
