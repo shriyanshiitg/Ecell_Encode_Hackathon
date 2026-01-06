@@ -33,11 +33,14 @@ Use this checklist to deploy your app step-by-step.
 - [ ] Copy your backend URL (looks like: `https://smart-ingredient-api.onrender.com`)
 - [ ] Test backend health: Visit `https://your-url.onrender.com/health`
 
-### ⚠️ IMPORTANT: Python Version Issue
-If build fails with "KeyError: '__version__'" error:
+### ⚠️ IMPORTANT: Python Version Issues (FIXED)
+If build fails with compatibility errors:
 1. Make sure you selected **Python 3.11** (NOT 3.13)
-2. Pillow 10.1.0 has compatibility issues with Python 3.13
-3. Our requirements.txt is now fixed with `Pillow>=10.0.0` which works with Python 3.11
+2. Old versions of Pillow and pydantic-core have issues with Python 3.13
+3. Our requirements.txt is now fixed with:
+   - `Pillow>=10.0.0` (instead of ==10.1.0)
+   - `pydantic>=2.5.0` (instead of ==2.5.3)
+4. These changes allow pip to install Python 3.13-compatible versions automatically
 
 ---
 
@@ -80,14 +83,15 @@ If build fails with "KeyError: '__version__'" error:
 
 ## 🐛 If Something Breaks
 
-**Build Failed - "KeyError: '__version__'" Error:**
-- **Cause**: Python 3.13 compatibility issue with Pillow
+**Build Failed - Compatibility Errors:**
+- **Causes**:
+  - "KeyError: '__version__'" = Pillow 10.1.0 incompatible with Python 3.13
+  - "ForwardRef._evaluate() missing argument" = pydantic-core 2.14.6 incompatible with Python 3.13
 - **Fix**:
-  1. Delete the failed service on Render
-  2. Create a new Web Service
-  3. Select **Python 3.11** as runtime (NOT 3.13)
-  4. Make sure latest code is pushed to GitHub (has `Pillow>=10.0.0` fix)
-  5. Deploy again
+  1. Make sure latest code is pushed (commit 333c819 or later)
+  2. In Render, click **"Manual Deploy"** → **"Clear build cache & deploy"**
+  3. OR: Delete failed service, create new one with Python 3.11 selected
+  4. Requirements now use `>=` versions for automatic compatibility
 
 **Backend Issues:**
 1. Check Render dashboard → Logs
