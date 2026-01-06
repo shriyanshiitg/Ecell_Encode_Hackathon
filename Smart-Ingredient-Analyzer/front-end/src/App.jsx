@@ -288,16 +288,18 @@ function App() {
       setIsProcessing(false);
       console.error('Analysis error:', error);
 
-      let errorMsg = "I had trouble analyzing that image. ";
+      let errorMsg = "";
 
-      if (error.response?.data?.code === 'INSUFFICIENT_INGREDIENTS') {
-        errorMsg += "Could you try focusing more closely on the ingredient list?";
+      if (error.response?.data?.code === 'OCR_NOT_AVAILABLE') {
+        errorMsg = "📝 Image OCR is not available on the free hosting tier. No worries though! You can:\n\n1. Type or paste the ingredients manually using the text input below\n2. All other features work perfectly - chat, analysis, comparison, etc.\n\nJust switch to 'Type Ingredients' and paste the text from the ingredient list!";
+      } else if (error.response?.data?.code === 'INSUFFICIENT_INGREDIENTS') {
+        errorMsg = "I had trouble analyzing that image. Could you try focusing more closely on the ingredient list?";
       } else if (error.response?.data?.code === 'OCR_FAILED') {
-        errorMsg += "The image wasn't clear enough. Could you try taking another photo with better lighting?";
+        errorMsg = "I had trouble analyzing that image. The image wasn't clear enough. Could you try taking another photo with better lighting?";
       } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
-        errorMsg += "That took too long. Let's try again with a clearer image.";
+        errorMsg = "I had trouble analyzing that image. That took too long. Let's try again with a clearer image.";
       } else {
-        errorMsg += "Let's try again - maybe with better lighting or a closer shot of the ingredients.";
+        errorMsg = "I had trouble analyzing that image. Let's try again - maybe with better lighting or a closer shot of the ingredients.";
       }
 
       setMessages(prev => [...prev, {
