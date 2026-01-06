@@ -23,7 +23,7 @@ Use this checklist to deploy your app step-by-step.
   - [ ] **Name**: `smart-ingredient-api`
   - [ ] **Root Directory**: `Smart-Ingredient-Analyzer/backend`
   - [ ] **Runtime**: Select **Python 3.11** (IMPORTANT: NOT 3.13!)
-  - [ ] **Build Command**: `pip install -r requirements.txt && apt-get update && apt-get install -y tesseract-ocr`
+  - [ ] **Build Command**: `pip install -r requirements.txt`
   - [ ] **Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
 - [ ] Add environment variables:
   - [ ] `GROQ_API_KEY` = (paste your key)
@@ -107,9 +107,13 @@ If build fails with compatibility errors:
 4. Check network tab for failed requests
 
 **OCR Not Working:**
-- This is expected on free tier (limited CPU/memory)
-- Manual input should work fine
-- Consider upgrading Render plan for full OCR support
+- **Render free tier doesn't support Tesseract installation** (requires apt-get)
+- OCR image upload will return an error
+- **Manual text input works perfectly** - use this instead!
+- For full OCR support:
+  - Option 1: Upgrade to Render paid plan ($7/mo) with Docker support
+  - Option 2: Deploy backend to Railway, Fly.io, or other platforms that support apt-get
+  - Option 3: Use the app with manual input only (works great!)
 
 ---
 

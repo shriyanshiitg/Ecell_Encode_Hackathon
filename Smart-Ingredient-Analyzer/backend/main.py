@@ -13,10 +13,18 @@ from datetime import datetime
 
 from services.groq_service import GroqService
 from services.context_service import ContextService
-from services.ocr_service import OCRService
 from utils.cache import analysis_cache, context_cache
 from utils import validators, helpers
 from config.settings import settings
+
+# Try to import OCR service (may not be available on all platforms)
+try:
+    from services.ocr_service import OCRService
+    OCR_AVAILABLE = True
+except Exception as e:
+    print(f"⚠️  OCR service not available: {e}")
+    print("📝 Manual text input will still work!")
+    OCR_AVAILABLE = False
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -48,7 +56,10 @@ app.add_middleware(
 # Initialize services
 groq_service = GroqService()
 context_service = ContextService()
-ocr_service = OCRService()
+if OCR_AVAILABLE:
+    ocr_service = OCRService()
+else:
+    ocr_service = None
 
 # Request Models
 class AnalyzeRequest(BaseModel):
@@ -108,6 +119,13 @@ async def health_check():
 async def analyze_image(request: AnalyzeRequest):
     """Analyze ingredient image with OCR"""
     try:
+        # Check if OCR is available
+        if not OCR_AVAILABLE or ocr_service is None:
+            raise HTTPException(status_code=503, detail={
+                "code": "OCR_NOT_AVAILABLE",
+                "message": "OCR service is not available on this server. Please use manual text input instead. (Tesseract OCR requires system dependencies not available on free hosting tier)"
+            })
+
         start_time = time.time()
 
         print(f"📷 Processing image with OCR...")
