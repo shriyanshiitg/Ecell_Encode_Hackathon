@@ -2,6 +2,7 @@ services:
   - type: web
     name: smart-ingredient-analyzer-api
     env: python
+    runtime: python-3.11.9
     region: oregon
     buildCommand: "cd Smart-Ingredient-Analyzer/backend && pip install -r requirements.txt && apt-get update && apt-get install -y tesseract-ocr"
     startCommand: "cd Smart-Ingredient-Analyzer/backend && uvicorn main:app --host 0.0.0.0 --port $PORT"
